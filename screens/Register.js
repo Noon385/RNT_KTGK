@@ -1,7 +1,8 @@
 import React, { useState} from 'react';
 import { View, Text, TextInput, Button, StyleSheet,Image  } from 'react-native';
-import {auth} from '../database/firebaseconfig'
+import {db,auth} from '../database/firebaseconfig'
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { addDoc, collection, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 
 const RegisterForm = () => {
   const [fullName, setFullName] = useState('');
@@ -9,7 +10,11 @@ const RegisterForm = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
-
+  const USERS = collection(db, "USERS")
+  const Todos = collection(db, "TODOS")
+  const handleLogIn = () => {
+    navigation.navigate('LoginForm');
+  }
   const handleSubmit = async () => {
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
@@ -25,10 +30,18 @@ const RegisterForm = () => {
       }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth,email, password);
-      const user = userCredential.user;
-      await user.updateProfile({ displayName: fullName });
-      console.log('User registered:', user);
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => {
+            alert("Create account successful");
+            var USERDoc = doc(db, "USERS", email);
+            setDoc(USERDoc, {
+                email,
+                password,
+                fullName
+            }).then(() => console.log("add new document"))
+                .catch((e) => console.log(e))
+        })
+        .catch((e) => console.log(e))
     } catch (error) {
       setError(error.message);
     }
@@ -71,7 +84,9 @@ const RegisterForm = () => {
 
       {error && <Text style={styles.error}>{error}</Text>}
 
-      <Text onPress={handleSubmit} style={styles.button}>Login</Text>
+      <Text onPress={() => handleSubmit()} style={styles.button}>Sign Up</Text>
+      <Text>Already have an account ? 
+      <Text style={styles.Text} onPress = {() => handleLogIn()}> Login</Text></Text>
     </View>
   );
 };
@@ -113,6 +128,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     marginBottom: 16,
+  },Text:{
+    fontSize: '10',
+    color:"blue",
   },
 });
 

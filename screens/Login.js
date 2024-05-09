@@ -3,15 +3,22 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../database/firebaseconfig';
 import { Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 
-const LoginForm = () => {
+const LoginForm = ({navigation}) => {
+   
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('user@gmail.com');
+  const [password, setPassword] = useState('123456');
 
   const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password).then(() => alert("Login successfully ")).catch((e) => console.log(e));
+    signInWithEmailAndPassword(auth, email, password)
+    .then(() => {alert("Login successfully "),navigation.navigate('Home')}
+    ).catch((e)=>{console.log(e)});
+  }
+  const handleSignUp = () => {
+    navigation.navigate('RegisterForm');
   }
 
   return (
@@ -38,7 +45,7 @@ const LoginForm = () => {
       <Text onPress={handleLogin} style={styles.button}>Login</Text>
       <View>
       <Text>Don't have an account ?
-      <Text  style={styles.Text}>Sign Up</Text></Text>
+      <Text style={styles.Text} onPress = {() => handleSignUp()}>Sign Up</Text></Text>
       </View>
     </View>
       
